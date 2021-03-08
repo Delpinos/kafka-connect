@@ -1,0 +1,249 @@
+version: "3.8"
+
+services:
+  kafka-connect-cdc:
+    image: delpinos/kafka-connect
+    container_name: kafka-connect-cdc
+    networks:
+      - n1
+    ports:
+      - 18083:18083
+    environment:
+      BOOTSTRAP_SERVERS: "broker-1:29092,broker-2:29092,broker-3:29092,broker-4:29092" 
+      GROUP_ID: "kafka-connect-cdc"
+      KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONFIG_STORAGE_TOPIC: "kafka-connect-cdc.configs"
+      OFFSET_STORAGE_TOPIC: "kafka-connect-cdc.offsets"
+      STATUS_STORAGE_TOPIC: "kafka-connect.status"
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      REST_HOST_NAME: "kafka-connect-cdc"
+      REST_PORT: 18083
+      ADVERTISED_HOST_NAME: "kafka-connect-cdc"
+      ADVERTISED_PORT: 18083
+      REGISTER_1_NAME: "kafka-connect-cdc-test-1"      
+      REGISTER_1_CONFIG_CONNECTOR_CLASS: "io.debezium.connector.postgresql.PostgresConnector"
+      REGISTER_1_CONFIG_PLUGIN_NAME: "pgoutput"
+      REGISTER_1_CONFIG_TASKS_MAX: "1"
+      REGISTER_1_CONFIG_DATABASE_HOSTNAME: "debezium-postgres-test-1"
+      REGISTER_1_CONFIG_DATABASE_PORT: "5432"
+      REGISTER_1_CONFIG_DATABASE_USER: "postgres"
+      REGISTER_1_CONFIG_DATABASE_PASSWORD: "postgres"
+      REGISTER_1_CONFIG_DATABASE_DBNAME: "test"
+      REGISTER_1_CONFIG_DATABASE_SERVER_NAME: "kafka-connect-cdc-test-1"
+      REGISTER_1_CONFIG_TABLE_WHITELIST: "test.test_cdc"   
+      REGISTER_1_CONFIG_SLOT_NAME: "test"
+      REGISTER_1_CONFIG_INCLUDE_SCHEMA_CHANGES: "true"
+      REGISTER_1_CONFIG_AUTO_CREATE: "true"     
+      REGISTER_1_CONFIG_TIME_PRECISION_MODE: "connect"
+      REGISTER_1_CONFIG_DECIMAL_HANDLING_MODE: "double"
+      REGISTER_2_NAME: "kafka-connect-cdc-test-2"      
+      REGISTER_2_CONFIG_CONNECTOR_CLASS: "io.debezium.connector.postgresql.PostgresConnector"
+      REGISTER_2_CONFIG_PLUGIN_NAME: "pgoutput"
+      REGISTER_2_CONFIG_TASKS_MAX: "1"
+      REGISTER_2_CONFIG_DATABASE_HOSTNAME: "debezium-postgres-test-2"
+      REGISTER_2_CONFIG_DATABASE_PORT: "5432"
+      REGISTER_2_CONFIG_DATABASE_USER: "postgres"
+      REGISTER_2_CONFIG_DATABASE_PASSWORD: "postgres"
+      REGISTER_2_CONFIG_DATABASE_DBNAME: "test"
+      REGISTER_2_CONFIG_DATABASE_SERVER_NAME: "kafka-connect-cdc-test-2"
+      REGISTER_1_CONFIG_TABLE_WHITELIST: "test.test_cdc" 
+      REGISTER_2_CONFIG_SLOT_NAME: "test"
+      REGISTER_2_CONFIG_INCLUDE_SCHEMA_CHANGES: "true"
+      REGISTER_2_CONFIG_AUTO_CREATE: "true"     
+      REGISTER_2_CONFIG_TIME_PRECISION_MODE: "connect"
+      REGISTER_2_CONFIG_DECIMAL_HANDLING_MODE: "double"
+    restart: always
+    privileged: true
+    tty: true
+
+  kafka-connect-jdbc:
+    image: delpinos/kafka-connect
+    container_name: kafka-connect-jdbc
+    networks:
+      - n1
+    ports:
+      - 28083:28083
+    environment:
+      BOOTSTRAP_SERVERS: "broker-1:29092,broker-2:29092,broker-3:29092,broker-4:29092" 
+      GROUP_ID: "kafka-connect-jdbc"
+      KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONFIG_STORAGE_TOPIC: "kafka-connect-jdbc.configs"
+      OFFSET_STORAGE_TOPIC: "kafka-connect-jdbc.offsets"
+      STATUS_STORAGE_TOPIC: "kafka-connect-jdbc.status"
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      REST_HOST_NAME: "kafka-connect-jdbc"
+      REST_PORT: 28083
+      ADVERTISED_HOST_NAME: "kafka-connect-jdbc"
+      ADVERTISED_PORT: 28083
+      REGISTER_1_NAME: "kafka-connect-jdbc-test-1"
+      REGISTER_1_CONFIG_AUTO_CREATE: "true"
+      REGISTER_1_CONFIG_VALIDATE_NON_NULL: "false"
+      REGISTER_1_CONFIG_POLL_INTERVAL_MS: 10000
+      REGISTER_1_CONFIG_TOPIC_PREFIX: "kafka-connect-jdbc-test-1.test.test_jdbc"
+      REGISTER_1_CONFIG_TASKS_MAX: 1
+      REGISTER_1_CONFIG_MODE: "timestamp+incrementing"
+      REGISTER_1_CONFIG_QUERY: "SELECT * FROM test.test_jdbc"
+      REGISTER_1_CONFIG_INCREMENTING_COLUMN_NAME: "id"
+      REGISTER_1_CONFIG_TIMESTAMP_COLUMN_NAME: "modified"
+      REGISTER_1_CONFIG_CONNECTOR_CLASS: "io.confluent.connect.jdbc.JdbcSourceConnector"
+      REGISTER_1_CONFIG_CONNECTION_URL: "jdbc:postgresql://debezium-postgres-test-1:5432/test"
+      REGISTER_1_CONFIG_CONNECTION_USER: "postgres"
+      REGISTER_1_CONFIG_CONNECTION_PASSWORD: "postgres"
+      REGISTER_2_NAME: "kafka-connect-jdbc-test-2"
+      REGISTER_2_CONFIG_AUTO_CREATE: "true"
+      REGISTER_2_CONFIG_VALIDATE_NON_NULL: "false"
+      REGISTER_2_CONFIG_POLL_INTERVAL_MS: 10000
+      REGISTER_2_CONFIG_TOPIC_PREFIX: "kafka-connect-jdbc-test-2.test.test_jdbc"
+      REGISTER_2_CONFIG_TASKS_MAX: 1
+      REGISTER_2_CONFIG_MODE: "timestamp+incrementing"
+      REGISTER_2_CONFIG_QUERY: "SELECT * FROM test.test_jdbc"
+      REGISTER_2_CONFIG_INCREMENTING_COLUMN_NAME: "id"
+      REGISTER_2_CONFIG_TIMESTAMP_COLUMN_NAME: "modified"
+      REGISTER_2_CONFIG_CONNECTOR_CLASS: "io.confluent.connect.jdbc.JdbcSourceConnector"
+      REGISTER_2_CONFIG_CONNECTION_URL: "jdbc:postgresql://debezium-postgres-test-2:5432/test"
+      REGISTER_2_CONFIG_CONNECTION_USER: "postgres"
+      REGISTER_2_CONFIG_CONNECTION_PASSWORD: "postgres"
+    restart: always
+    privileged: true
+    tty: true
+
+  kafka-sink-cdc:
+    image: delpinos/kafka-connect
+    container_name: kafka-sink-cdc
+    networks:
+      - n1
+    ports:
+      - 38083:38083
+    environment:
+      BOOTSTRAP_SERVERS: "broker-1:29092,broker-2:29092,broker-3:29092,broker-4:29092" 
+      GROUP_ID: "kafka-sink-cdc"
+      KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONFIG_STORAGE_TOPIC: "kafka-sink-cdc.configs"
+      OFFSET_STORAGE_TOPIC: "kafka-sink-cdc.offsets"
+      STATUS_STORAGE_TOPIC: "kafka-sink-cdc.status"
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      REST_HOST_NAME: "kafka-sink-cdc"
+      REST_PORT: 38083
+      ADVERTISED_HOST_NAME: "kafka-sink-cdc"
+      ADVERTISED_PORT: 38083
+      REGISTER_1_NAME: "kafka-sink-cdc-test-1"       
+      REGISTER_1_CONFIG_TASKS_MAX: 1        
+      REGISTER_1_CONFIG_TOPICS: "kafka-connect-cdc-test-1.test.test_cdc"  
+      REGISTER_1_CONFIG_TABLE_NAME_FORMAT: "test.test_cdc_replica"
+      REGISTER_1_CONFIG_CONNECTOR_CLASS: "io.confluent.connect.jdbc.JdbcSinkConnector"            
+      REGISTER_1_CONFIG_CONNECTION_URL: "jdbc:postgresql://debezium-postgres-test-2:5432/test"
+      REGISTER_1_CONFIG_CONNECTION_USER: "postgres"
+      REGISTER_1_CONFIG_CONNECTION_PASSWORD: "postgres"
+      REGISTER_1_CONFIG_DIALECT_NAME: "PostgreSqlDatabaseDialect"
+      REGISTER_1_CONFIG_AUTO_CREATE: "true"    
+      REGISTER_1_CONFIG_AUTO_ENVOLVE: "true" 
+      REGISTER_1_CONFIG_TOPIC_CREATION_ENABLE: "true"
+      REGISTER_1_CONFIG_INSERT_MODE_DATABASELEVEL: "true"
+      REGISTER_1_CONFIG_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
+      REGISTER_1_CONFIG_PK_FIELDS: "id"
+      REGISTER_1_CONFIG_PK_MODE: "record_value"
+      REGISTER_1_CONFIG_INSERT_MODE: "upsert"
+      REGISTER_1_CONFIG_TRANSFORMS: "unwrap"  
+      REGISTER_1_CONFIG_TRANSFORMS_UNWRAP_TYPE: "io.debezium.transforms.ExtractNewRecordState"
+      REGISTER_2_NAME: "kafka-sink-cdc-test-2"       
+      REGISTER_2_CONFIG_TASKS_MAX: 1        
+      REGISTER_2_CONFIG_TOPICS: "kafka-connect-cdc-test-2.test.test_cdc"  
+      REGISTER_2_CONFIG_TABLE_NAME_FORMAT: "test.test_cdc_replica"
+      REGISTER_2_CONFIG_CONNECTOR_CLASS: "io.confluent.connect.jdbc.JdbcSinkConnector"            
+      REGISTER_2_CONFIG_CONNECTION_URL: "jdbc:postgresql://debezium-postgres-test-1:5432/test"
+      REGISTER_2_CONFIG_CONNECTION_USER: "postgres"
+      REGISTER_2_CONFIG_CONNECTION_PASSWORD: "postgres"
+      REGISTER_2_CONFIG_DIALECT_NAME: "PostgreSqlDatabaseDialect"
+      REGISTER_2_CONFIG_AUTO_CREATE: "true"    
+      REGISTER_2_CONFIG_AUTO_ENVOLVE: "true" 
+      REGISTER_2_CONFIG_TOPIC_CREATION_ENABLE: "true"
+      REGISTER_2_CONFIG_INSERT_MODE_DATABASELEVEL: "true"
+      REGISTER_2_CONFIG_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
+      REGISTER_2_CONFIG_PK_FIELDS: "id"
+      REGISTER_2_CONFIG_PK_MODE: "record_value"
+      REGISTER_2_CONFIG_INSERT_MODE: "upsert"
+      REGISTER_2_CONFIG_TRANSFORMS: "unwrap"  
+      REGISTER_2_CONFIG_TRANSFORMS_UNWRAP_TYPE: "io.debezium.transforms.ExtractNewRecordState"
+    restart: always
+    privileged: true
+    tty: true
+    
+  kafka-sink-jdbc:
+    image: delpinos/kafka-connect
+    container_name: kafka-sink-jdbc
+    networks:
+      - n1
+    ports:
+      - 48083:48083
+    environment:
+      BOOTSTRAP_SERVERS: "broker-1:29092,broker-2:29092,broker-3:29092,broker-4:29092" 
+      GROUP_ID: "kafka-sink-jdbc"
+      KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONFIG_STORAGE_TOPIC: "kafka-sink-jdbc.configs"
+      OFFSET_STORAGE_TOPIC: "kafka-sink-jdbc.offsets"
+      STATUS_STORAGE_TOPIC: "kafka-sink-jdbc.status"
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      REST_HOST_NAME: "kafka-sink-jdbc"
+      REST_PORT: 48083
+      ADVERTISED_HOST_NAME: "kafka-sink-jdbc"
+      ADVERTISED_PORT: 48083
+      REGISTER_1_NAME: "kafka-sink-jdbc-test-1"       
+      REGISTER_1_CONFIG_TASKS_MAX: 1        
+      REGISTER_1_CONFIG_TOPICS: "kafka-connect-jdbc-test-1.test.test_jdbc"  
+      REGISTER_1_CONFIG_TABLE_NAME_FORMAT: "test.test_jdbc_replica"
+      REGISTER_1_CONFIG_CONNECTOR_CLASS: "io.confluent.connect.jdbc.JdbcSinkConnector"            
+      REGISTER_1_CONFIG_CONNECTION_URL: "jdbc:postgresql://debezium-postgres-test-2:5432/test"
+      REGISTER_1_CONFIG_CONNECTION_USER: "postgres"
+      REGISTER_1_CONFIG_CONNECTION_PASSWORD: "postgres"
+      REGISTER_1_CONFIG_DIALECT_NAME: "PostgreSqlDatabaseDialect"
+      REGISTER_1_CONFIG_AUTO_CREATE: "true"    
+      REGISTER_1_CONFIG_AUTO_ENVOLVE: "true" 
+      REGISTER_1_CONFIG_TOPIC_CREATION_ENABLE: "true"
+      REGISTER_1_CONFIG_INSERT_MODE_DATABASELEVEL: "true"
+      REGISTER_1_CONFIG_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
+      REGISTER_1_CONFIG_PK_FIELDS: "id"
+      REGISTER_1_CONFIG_PK_MODE: "record_value"
+      REGISTER_1_CONFIG_INSERT_MODE: "upsert"
+      REGISTER_2_NAME: "kafka-sink-jdbc-test-2"       
+      REGISTER_2_CONFIG_TASKS_MAX: 1        
+      REGISTER_2_CONFIG_TOPICS: "kafka-connect-jdbc-test-2.test.test_jdbc"  
+      REGISTER_2_CONFIG_TABLE_NAME_FORMAT: "test.test_jdbc_replica"
+      REGISTER_2_CONFIG_CONNECTOR_CLASS: "io.confluent.connect.jdbc.JdbcSinkConnector"            
+      REGISTER_2_CONFIG_CONNECTION_URL: "jdbc:postgresql://debezium-postgres-test-1:5432/test"
+      REGISTER_2_CONFIG_CONNECTION_USER: "postgres"
+      REGISTER_2_CONFIG_CONNECTION_PASSWORD: "postgres"
+      REGISTER_2_CONFIG_DIALECT_NAME: "PostgreSqlDatabaseDialect"
+      REGISTER_2_CONFIG_AUTO_CREATE: "true"    
+      REGISTER_2_CONFIG_AUTO_ENVOLVE: "true" 
+      REGISTER_2_CONFIG_TOPIC_CREATION_ENABLE: "true"
+      REGISTER_2_CONFIG_INSERT_MODE_DATABASELEVEL: "true"
+      REGISTER_2_CONFIG_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
+      REGISTER_2_CONFIG_PK_FIELDS: "id"
+      REGISTER_2_CONFIG_PK_MODE: "record_value"
+      REGISTER_2_CONFIG_INSERT_MODE: "upsert"
+    restart: always
+    privileged: true
+    tty: true  
+
+networks:
+  n1:
